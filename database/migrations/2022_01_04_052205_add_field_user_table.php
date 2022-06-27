@@ -17,6 +17,7 @@ class AddFieldUserTable extends Migration
             $table->string("role")->after("email")->default("USER");
             $table->string("phone")->after("email")->nullable();
             $table->string("username")->after("email")->nullable();
+            $table->text("token_fcm")->after("role")->nullable();
         });
     }
 
@@ -31,6 +32,7 @@ class AddFieldUserTable extends Migration
             $table->dropColumn("role");
             $table->dropColumn("phone");
             $table->dropColumn("username");
+            $table->dropColumn("token_fcm");
         });
     }
 }

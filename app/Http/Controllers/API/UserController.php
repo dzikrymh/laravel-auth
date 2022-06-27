@@ -96,8 +96,7 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'phone' => ['requ
-            ired', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:255'],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -121,5 +120,29 @@ class UserController extends Controller
     {
         $token = $request->user()->currentAccessToken()->delete();
         return ResponseFormatter::success($token, "Token Revoked");
+    }
+
+    public function updateTokenFCM(Request $request)
+    {
+        $rules = [
+            'token_fcm' => ['required', 'string'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+         
+        if($validator->fails()){
+            return ResponseFormatter::error([
+                'message' => "Something went wrong",
+                'error' => $validator->errors(),
+            ], "Update Token FCM Failed", 500);
+        }
+
+        $data = $request->all();
+        
+        $user = Auth::user();
+        $user->token_fcm = $request->token_fcm;
+        $user->update();
+
+        return ResponseFormatter::success($user, "Token FCM updated");
     }
 }

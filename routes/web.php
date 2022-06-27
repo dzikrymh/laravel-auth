@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CloudMessageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,6 +18,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+Route::prefix('dashboard')
+    ->middleware(['auth:sanctum', 'verified', 'admin'])
+    ->group(function(){
+        Route::get('/', [CloudMessageController::class, 'index'])->name('dashboard');
+        Route::post('push', [CloudMessageController::class, 'store'])->name('push');
+    });
