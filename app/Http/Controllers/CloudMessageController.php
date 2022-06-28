@@ -34,34 +34,43 @@ class CloudMessageController extends Controller
      */
     public function store(Request $request)
     {       
-        $SERVER_API_KEY = env('FCM_SERVER_KEY');
+        try {
+            $SERVER_API_KEY = env('FCM_SERVER_KEY');
     
-        $data = [
-            "registration_ids" => $request->token_fcm,
-            "notification" => [
-                "title" => $request->title,
-                "body" => $request->body,  
-            ]
-        ];
-        $dataString = json_encode($data);
-      
-        $headers = [
-            'Authorization: key=' . $SERVER_API_KEY,
-            'Content-Type: application/json',
-        ];
-      
-        $ch = curl_init();
+            $data = [
+                "priority" => "high",
+                "android" => [
+                    "ttl" => env('FCM_TTL_SEC')."s"
+                ],
+                "to" => $request->token_fcm,
+                "data" => [
+                    "title" => $request->title,
+                    "message" => $request->message,  
+                ]
+            ];
+            $dataString = json_encode($data);
         
-        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
-                 
-        $response = curl_exec($ch);
-    
-        return 'Notification send successfully.';
+            $headers = [
+                'Authorization: key=' . $SERVER_API_KEY,
+                'Content-Type: application/json',
+            ];
+        
+            $ch = curl_init();
+            
+            curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);      
+
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            return ['status' => 1, 'result' => $response];
+        } catch (\Exception $e) {
+            return ['status' => 0, 'result' => $e->getMessage()];
+        }
     }
 
     /**
